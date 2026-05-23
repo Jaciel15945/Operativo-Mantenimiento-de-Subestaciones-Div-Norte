@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mapa Interactivo - Subestaciones</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { background: #f3f4f6; color: #111827; }
+    
+    .header {
+      background: #0f172a;
+      color: white;
+      padding: 18px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .header h1 { font-size: 22px; }
+
+    .stats { display: flex; gap: 12px; }
+    .card {
+      background: white;
+      padding: 12px 18px;
+      border-radius: 12px;
+      min-width: 130px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .card h2 { font-size: 30px; font-weight: 700; margin-bottom: 2px; color: #0f172a; }
+    .card p { margin: 0; font-size: 14px; color: #4b5563; font-weight: 500; }
+
+    .layout { 
+      display: grid; 
+      grid-template-columns: 340px 1fr; 
+      height: calc(100vh - 85px); 
+    }
+    .sidebar {
+      background: white;
+      padding: 20px;
+      overflow-y: auto;
+      border-right: 1px solid #e5e7eb;
+    }
+    .search {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      margin-bottom: 20px;
+    }
+    .subestacion {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      padding: 15px;
+      border-radius: 14px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .subestacion:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .estado {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: white;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .verde { background: #16a34a; }
+    .amarillo { background: #eab308; color: black; }
+    .rojo { background: #dc2626; }
+
+    #map { width: 100%; height: 100%; }
+
+    .slider-container {
+      position: relative;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .slider-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .slider-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      z-index: 999;
+    }
+    .prev-btn { left: 8px; }
+    .next-btn { right: 8px; }
+
+    .legend {
+      margin-top: 25px;
+      padding: 15px;
+      background: #f3f4f6;
+      border-radius: 12px;
+    }
+    .legend div {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dot { width: 16px; height: 16px; border-radius: 50%; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>⚡ Operativo Mantenimiento de Subestaciones Div Norte</h1>
+    <div class="stats">
+      <div class="card"><h2>49</h2><p>Total</p></div>
+      <div class="card"><h2>38</h2><p>Terminadas</p></div>
+      <div class="card"><h2>11</h2><p>Pendientes</p></div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <h2>Subestaciones</h2>
+      <input type="text" class="search" id="search" placeholder="Buscar subestación..." />
+      <div id="lista"></div>
+   
+      <div class="legend">
+        <h3 style="margin-bottom: 12px;">Leyenda</h3>
+        <div><span class="dot" style="background:#16a34a"></span><span>Mantenimiento completado</span></div>
+        <div><span class="dot" style="background:#eab308"></span><span>En proceso</span></div>
+        <div><span class="dot" style="background:#dc2626"></span><span>Problemas encontrados</span></div>
+      </div>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <script>
+    const subestaciones = [
+      {
+        nombre: 'S.E ARCADIO',
+        estado: 'Completado',
+        clase: 'verde',
+        lat: 25.48206900,
+        lon: -103.14516100,
+        fecha: '18/05/2026',
+        responsable: 'Equipo Div Norte',
+        imagenes: ['imagenes/ADI 4030.jpg', 'imagenes/ADI 4040.jpg']
+      },
+      {
+        nombre: 'S.E AEROPUERTO',
+        estado: 'Completado',
+        clase: 'verde',
+        lat: 31.62374100,
+        lon: -106.44892500,
+        fecha: '20/05/2026',
+        responsable: 'Equipo Div Norte',
+        imagenes: ['imagenes/AEP 4110.jpg', 'imagenes/AEP 4120.jpg', 'imagenes/AEP 4190.jpg']
+      },
+      {
+        nombre: 'S.E ALLENDE',
+        estado: 'Completado',
+        clase: 'verde',
+        lat: 25.59239900,
+        lon: -103.38578800,
+        fecha: '22/05/2026',
+        responsable: 'Equipo Div Norte',
+        imagenes: [
+          'imagenes/ALL 4010.jpg','imagenes/ALL 4020.jpg','imagenes/ALL 4030.jpg','imagenes/ALL 4040.jpg',
+          'imagenes/ALL 4050.jpg','imagenes/ALL 4060.jpg','imagenes/ALL 4080.jpg','imagenes/ALL 4090.jpg',
+          'imagenes/ALL 4100.jpg','imagenes/ALL 4110.jpg','imagenes/ALL 42010.jpg','imagenes/ALL T1.jpg'
+        ]
+      },
+    {
+    nombre: 'S.E AMADO NERVO',
+    estado: 'Completado',
+    clase: 'verde',
+    lat: 23.84746000,
+    lon: -104.18594300,
+    fecha: '17/05/2026',
+    responsable: 'Equipo Div Norte',
+    imagenes: [
+        'imagenes/AMN 5010.jpg',
+        'imagenes/AMN 5020.jpg',
+        'imagenes/AMN 5030.jpg'
+    ]
+},
+{
+    nombre: 'S.E AZTECAS',
+    estado: 'Completado',
+    clase: 'verde',
+    lat: 31.67448900,
+    lon: -106.45753700,
+    fecha: '19/05/2026',
+    responsable: 'Equipo Div Norte',
+    imagenes: [
+        'imagenes/AZT 42010.jpg',
+        'imagenes/AZT 42020.jpg',
+        'imagenes/AZT T1.jpg',
+        'imagenes/AZT T2.jpg'
+    ]
+},
+{
+    nombre: 'S.E BATOPILAS',
+    estado: 'Completado',
+    clase: 'verde',
+    lat: 25.91834900,
+    lon: -103.29077600,
+    fecha: '15/05/2026',
+    responsable: 'Equipo Div Norte',
+    imagenes: [
+        'imagenes/BAT 4670.jpg',
+        'imagenes/BAT 72010.jpg'
+    ]
+},
+{
+    nombre: 'S.E BENITO JUAREZ',
+    estado: 'Completado',
+    clase: 'Verde',
+    lat: 30.13698600,
+    lon: -106.87911700,
+    fecha: '21/05/2026',
+    responsable: 'Equipo Div Norte',
+    imagenes: [
+        'imagenes/BJZ 42010.jpg',
+        'imagenes/BJZ 42020.jpg',
+        'imagenes/BJZ 72010.jpg',
+        'imagenes/BJZ T1.jpg',
+        'imagenes/BJZ T2.jpg'
+    ]
+},
+{
+    nombre: 'S.E CARTAGENA',
+    estado: 'Completado',
+    clase: 'verde',
+    lat: 31.70678300,
+    lon: -106.46612500,
+    fecha: '16/05/2026',
+    responsable: 'Equipo Div Norte',
+    imagenes: [
+        'imagenes/CAR 78010.jpg',
+        'imagenes/CAR T2.jpg'
+    ]
+},
+{
+    nombre: 'S.E CAMARGO UNO',
+    estado: 'Completado',
+    clase: 'verde',
+    lat: 27.66083300,
+    lon: -105.15214100,
+    fecha: '18/05/2026',
+    responsable: 'Equipo Div Norte',
+    imagenes: [
+        'imagenes/CGU 4010.jpg',
+        'imagenes/CGU 4020.jpg',
+        'imagenes/CGU 4060.jpg',
+        'imagenes/CGU 4630.jpg',
+        'imagenes/CGU 4640.jpg',
+        'imagenes/CGU 4650.jpg',
+        'imagenes/CGU 4670.jpg',
+        'imagenes/CGU 42010.jpg',
+        'imagenes/CGU 42020.jpg',
+        'imagenes/CGU T1.jpg',
+        'imagenes/CGU T2.jpg'
+    ]
+},
+{
+    nombre: 'S.E CHAMIZAL',
+    estado: 'Completado',
+    clase: 'verde',
+    lat: 31.74912200,
+    lon: -106.47386400,
+    fecha: '20/05/2026',
+    responsable: 'Equipo Div Norte',
+    imagenes: [
+        'imagenes/CHA 42010.jpg',
+        'imagenes/CHA 72020.jpg',
+        'imagenes/CHA T1.jpg'
+    ]
+},
+{
+  nombre: 'S.E COLEGIO',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.73135000,
+  lon: -106.43726100,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/CLG T1.jpg',
+    'imagenes/CLG T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E CUESTA',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.67611100,
+  lon: -106.42694400,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/CUE 42010.jpg',
+    'imagenes/CUE 78010.jpg',
+    'imagenes/CUE 78020.jpg',
+    'imagenes/CUE T1.jpg'
+  ]
+},
+{
+  nombre: 'S.E CHAVEÑA',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.72069400,
+  lon: -106.47640600,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/CVA 42025.jpg',
+    'imagenes/CVA T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E DIAGONAL',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 25.50786300,
+  lon: -103.40241900,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/DGN 4015.jpg',
+    'imagenes/DGN 4025.jpg',
+    'imagenes/DGN 4055.jpg',
+    'imagenes/DGN 4065.jpg'
+  ]
+},
+{
+  nombre: 'S.E DURANGO UNO',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 24.03893100,
+  lon: -104.63179100,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/DGU 4210.jpg',
+    'imagenes/DGU 4220.jpg',
+    'imagenes/DGU 4230.jpg',
+    'imagenes/DGU 4240.jpg',
+    'imagenes/DGU 4250.jpg',
+    'imagenes/DGU 4260.jpg',
+    'imagenes/DGU 5010.jpg',
+    'imagenes/DGU 5020.jpg',
+    'imagenes/DGU 5030.jpg',
+    'imagenes/DGU 5040.jpg',
+    'imagenes/DGU 72010.jpg',
+    'imagenes/DGU 42010.jpg',
+    'imagenes/DGU T1.jpg'
+  ]
+},
+{
+  nombre: 'S.E FUENTES',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.72976800,
+  lon: -106.41382700,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/FTS 42025.jpg',
+    'imagenes/FTS T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E GRANJERO',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.64237900,
+  lon: -106.38682800,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/GJO 42010.jpg',
+    'imagenes/GJO T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E INSURGENTES',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.73398600,
+  lon: -106.52387200,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/IGS 4010.jpg',
+    'imagenes/IGS 4020.jpg',
+    'imagenes/IGS 4030.jpg',
+    'imagenes/IGS 4040.jpg',
+    'imagenes/IGS 4050.jpg',
+    'imagenes/IGS 4060.jpg'
+  ]
+},
+{
+  nombre: 'S.E INDUSTRIAL JUAREZ',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.65410500,
+  lon: -106.44472500,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/INJ 42030.jpg',
+    'imagenes/INJ 72030.jpg',
+    'imagenes/INJ T3.jpg'
+  ]
+},
+{
+  nombre: 'S.E JIMENEZ',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 27.14121309,
+  lon: -104.91016080,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/JEZ 4015.jpg',
+    'imagenes/JEZ 4025.jpg',
+    'imagenes/JEZ 4035.jpg',
+    'imagenes/JEZ 4045.jpg',
+    'imagenes/JEZ 4055.jpg',
+    'imagenes/JEZ 5010.jpg',
+    'imagenes/JEZ 5020.jpg',
+    'imagenes/JEZ 5030.jpg',
+    'imagenes/JEZ 5040.jpg',
+    'imagenes/JEZ 5050.jpg',
+    'imagenes/JEZ 52020.jpg',
+    'imagenes/JEZ 52030.jpg',
+    'imagenes/JEZ 72020.jpg',
+    'imagenes/JEZ 72030.jpg',
+    'imagenes/JEZ T2.jpg',
+    'imagenes/JEZ T3.jpg'
+  ]
+},
+{
+  nombre: 'S.E LAGUNA DOS',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 25.55257500,
+  lon: -103.47209100,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/LAG 4025.jpg',
+    'imagenes/LAG 4035.jpg',
+    'imagenes/LAG 4045.jpg',
+    'imagenes/LAG 4055.jpg',
+    'imagenes/LAG 4065.jpg',
+    'imagenes/LAG 4075.jpg',
+    'imagenes/LAG 4085.jpg',
+    'imagenes/LAG 4095.jpg'
+  ]
+},
+{
+  nombre: 'S.E LIBERTAD',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.69196600,
+  lon: -106.45214000,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/LIB 42010.jpg',
+    'imagenes/LIB T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E LA ROSITA',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 25.45882600,
+  lon: -103.26652100,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/LRT 4170.jpg',
+    'imagenes/LRT 4180.jpg',
+    'imagenes/LRT 42010.jpg',
+    'imagenes/LRT 72010.jpg',
+    'imagenes/LRT T1.jpg'
+  ]
+},
+{
+  nombre: 'S.E LA SALADA',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.34601337,
+  lon: -107.99440540,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/LSA 5415.jpg',
+    'imagenes/LSA 5425.jpg',
+    'imagenes/LSA 5445.jpg',
+    'imagenes/LSA 52015.jpg',
+    'imagenes/LSA 52025.jpg',
+    'imagenes/LSA 55015.jpg',
+    'imagenes/LSA 55025.jpg',
+    'imagenes/LSA 59125.jpg',
+    'imagenes/LSA T1.jpg',
+    'imagenes/LSA T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E MAYRAN',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 25.76581500,
+  lon: -103.00673000,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/MAY 4010.jpg',
+    'imagenes/MAY 4020.jpg',
+    'imagenes/MAY 4030.jpg',
+    'imagenes/MAY 4040.jpg',
+    'imagenes/MAY 42010.jpg'
+  ]
+},
+{
+  nombre: 'S.E MEDANOS',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.57719900,
+  lon: -106.37398000,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/MED 4015.jpg',
+    'imagenes/MED 4025.jpg',
+    'imagenes/MED 4055.jpg',
+    'imagenes/MED 4075.jpg',
+    'imagenes/MED 4095.jpg',
+    'imagenes/MED 4105.jpg',
+    'imagenes/MED 4115.jpg',
+    'imagenes/MED 42015.jpg',
+    'imagenes/MED 45015.jpg',
+    'imagenes/MED 45025.jpg',
+    'imagenes/MED T1.jpg'
+  ]
+},
+{
+  nombre: 'S.E MILENIO',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 24.02494800,
+  lon: -104.51987000,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/MIL 4520.jpg',
+    'imagenes/MIL 4530.jpg',
+    'imagenes/MIL 4540.jpg',
+    'imagenes/MIL 4550.jpg',
+    'imagenes/MIL 42010.jpg',
+    'imagenes/MIL T1.jpg'
+  ]
+},
+{
+  nombre: 'S.E NUEVA HOLANDA',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 28.90533000,
+  lon: -104.66624200,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/NHO 5810.jpg',
+    'imagenes/NHO 5840.jpg',
+    'imagenes/NHO 52010.jpg',
+    'imagenes/NHO 52020.jpg',
+    'imagenes/NHO 72010.jpg',
+    'imagenes/NHO 72020.jpg',
+    'imagenes/NHO T1.jpg',
+    'imagenes/NHO T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E LA PALMA',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 29.90725000,
+  lon: -106.28182900,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/PAL 42020.jpg',
+    'imagenes/PAL T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E RIVEREÑA',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.75009700,
+  lon: -106.41798600,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/RVA 42020.jpg',
+    'imagenes/RVA T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E SALVARCAR',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.61973400,
+  lon: -106.36593400,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/SVC 42025.jpg',
+    'imagenes/SVC T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E TECNOLOGICO',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.70812600,
+  lon: -106.42230200,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/TEC 42020.jpg',
+    'imagenes/TEC 72010.jpg',
+    'imagenes/TEC T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E TORRES',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 31.60500600,
+  lon: -106.40743500,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/TOR 4015.jpg',
+    'imagenes/TOR 4025.jpg',
+    'imagenes/TOR 4035.jpg',
+    'imagenes/TOR 4045.jpg',
+    'imagenes/TOR 4075.jpg',
+    'imagenes/TOR 4085.jpg',
+    'imagenes/TOR 42015.jpg',
+    'imagenes/TOR T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E VALLE VERDE',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 25.54513700,
+  lon: -103.36357000,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/VAE 4015.jpg',
+    'imagenes/VAE 4025.jpg',
+    'imagenes/VAE 4035.jpg',
+    'imagenes/VAE 4045.jpg',
+    'imagenes/VAE 4055.jpg',
+    'imagenes/VAE 4065.jpg',
+    'imagenes/VAE 47015.jpg'
+  ]
+},
+{
+  nombre: 'S.E VIÑEDOS',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 25.59043119,
+  lon: -103.36113350,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'imagenes/VDS 4015.jpg',
+    'imagenes/VDS 4025.jpg',
+    'imagenes/VDS 4035.jpg',
+    'imagenes/VDS 4045.jpg',
+    'imagenes/VDS 4055.jpg',
+    'imagenes/VDS 4065.jpg',
+    'imagenes/VDS T1.jpg'
+  ]
+},
+      {
+        nombre: 'S.E FRANCISCO ZARCO',
+        estado: 'Completado',
+        clase: 'verde',
+        lat: 25.75906400,
+        lon: -103.56578600,
+        fecha: '22/05/2026',
+        responsable: 'Equipo Div Norte',
+        imagenes: [
+          'imagenes/ZZA 4610.jpg','imagenes/ZZA 4620.jpg','imagenes/ZZA 4630.jpg','imagenes/ZZA 4640.jpg',
+          'imagenes/ZZA 4650.jpg','imagenes/ZZA 4660.jpg','imagenes/ZZA 42020.jpg','imagenes/ZZA T2.jpg'
+        ]
+      }
+    ];   // ←←← Aquí se cerró correctamente el array
+
+    const map = L.map('map').setView([25.60, -103.48], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const lista = document.getElementById('lista');
+    const indicesImagenes = {};
+
+    subestaciones.forEach(sub => {
+      const color = sub.clase === 'verde' ? 'green' : sub.clase === 'amarillo' ? 'orange' : 'red';
+
+      const marker = L.circleMarker([sub.lat, sub.lon], {
+        radius: 9,
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.85
+      }).addTo(map);
+
+      marker.bindPopup(`
+        <div style="width:280px;">
+          <h3>${sub.nombre}</h3>
+          <p><b>Estado:</b> ${sub.estado}</p>
+          <p><b>Fecha:</b> ${sub.fecha}</p>
+          <p><b>Responsable:</b> ${sub.responsable}</p>
+          <div class="slider-container">
+            <button class="slider-btn prev-btn" onclick="cambiarImagen('${sub.nombre}', -1)">‹</button>
+            <img id="img-${sub.nombre}" class="slider-img" src="${sub.imagenes[0]}" />
+            <button class="slider-btn next-btn" onclick="cambiarImagen('${sub.nombre}', 1)">›</button>
+          </div>
+        </div>
+      `);
+
+      const div = document.createElement('div');
+      div.className = 'subestacion';
+      div.innerHTML = `
+        <h3>${sub.nombre}</h3>
+        <p>Responsable: ${sub.responsable}</p>
+        <p>Fecha: ${sub.fecha}</p>
+        <span class="estado ${sub.clase}">${sub.estado}</span>
+      `;
+      div.onclick = () => {
+        map.setView([sub.lat, sub.lon], 13);
+        marker.openPopup();
+      };
+      lista.appendChild(div);
+    });
+
+    window.cambiarImagen = function(nombre, direccion) {
+      const sub = subestaciones.find(s => s.nombre === nombre);
+      if (!sub) return;
+      if (indicesImagenes[nombre] === undefined) indicesImagenes[nombre] = 0;
+      
+      indicesImagenes[nombre] += direccion;
+      if (indicesImagenes[nombre] >= sub.imagenes.length) indicesImagenes[nombre] = 0;
+      if (indicesImagenes[nombre] < 0) indicesImagenes[nombre] = sub.imagenes.length - 1;
+      
+      document.getElementById(`img-${nombre}`).src = sub.imagenes[indicesImagenes[nombre]];
+    };
+
+    // Buscador
+    document.getElementById('search').addEventListener('keyup', function() {
+      const texto = this.value.toLowerCase();
+      document.querySelectorAll('.subestacion').forEach(card => {
+        card.style.display = card.innerText.toLowerCase().includes(texto) ? 'block' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>
