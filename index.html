@@ -4,13 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mapa Interactivo - Subestaciones</title>
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-    body { background: #f3f4f6; color: #111827; }
-    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f3f4f6;
+      color: #111827;
+    }
+
     .header {
       background: #0f172a;
       color: white;
@@ -22,9 +32,16 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .header h1 { font-size: 22px; }
 
-    .stats { display: flex; gap: 12px; }
+    .header h1 {
+      font-size: 22px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 12px;
+    }
+
     .card {
       background: white;
       padding: 12px 18px;
@@ -33,20 +50,34 @@
       text-align: center;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .card h2 { font-size: 30px; font-weight: 700; margin-bottom: 2px; color: #0f172a; }
-    .card p { margin: 0; font-size: 14px; color: #4b5563; font-weight: 500; }
 
-    .layout { 
-      display: grid; 
-      grid-template-columns: 340px 1fr; 
-      height: calc(100vh - 85px); 
+    .card h2 {
+      font-size: 30px;
+      font-weight: 700;
+      margin-bottom: 2px;
+      color: #0f172a;
     }
+
+    .card p {
+      margin: 0;
+      font-size: 14px;
+      color: #4b5563;
+      font-weight: 500;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      height: calc(100vh - 85px);
+    }
+
     .sidebar {
       background: white;
       padding: 20px;
       overflow-y: auto;
       border-right: 1px solid #e5e7eb;
     }
+
     .search {
       width: 100%;
       padding: 12px;
@@ -54,6 +85,7 @@
       border: 1px solid #d1d5db;
       margin-bottom: 20px;
     }
+
     .subestacion {
       background: #f9fafb;
       border: 1px solid #e5e7eb;
@@ -63,10 +95,12 @@
       cursor: pointer;
       transition: 0.2s;
     }
+
     .subestacion:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
+
     .estado {
       display: inline-block;
       padding: 4px 10px;
@@ -75,39 +109,98 @@
       font-size: 12px;
       margin-top: 8px;
     }
-    .verde { background: #16a34a; }
-    .amarillo { background: #eab308; color: black; }
-    .rojo { background: #dc2626; }
 
-    #map { width: 100%; height: 100%; }
+    .verde {
+      background: #16a34a;
+    }
+
+    .amarillo {
+      background: #eab308;
+      color: black;
+    }
+
+    .rojo {
+      background: #dc2626;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
 
     .slider-container {
       position: relative;
       width: 100%;
-      margin-top: 10px;
+      margin-top: 12px;
     }
+
     .slider-img {
       width: 100%;
-      height: 180px;
-      object-fit: cover;
-      border-radius: 10px;
+      height: 320px;
+      object-fit: contain;
+      border-radius: 14px;
+      background: #000;
+      border: 2px solid #e5e7eb;
     }
+
     .slider-btn {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.7);
       color: white;
       border: none;
-      width: 32px;
-      height: 32px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 18px;
+      font-size: 24px;
       z-index: 999;
+      transition: 0.2s;
     }
-    .prev-btn { left: 8px; }
-    .next-btn { right: 8px; }
+
+    .slider-btn:hover {
+      background: rgba(0,0,0,0.9);
+      transform: translateY(-50%) scale(1.08);
+    }
+
+    .prev-btn {
+      left: 10px;
+    }
+
+    .next-btn {
+      right: 10px;
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 20px;
+      padding: 12px;
+    }
+
+    .leaflet-popup-content {
+      margin: 14px;
+      width: 520px !important;
+    }
+
+    .popup-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      color: #0f172a;
+    }
+
+    .popup-info {
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .popup-img-counter {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #6b7280;
+      font-weight: 600;
+    }
 
     .legend {
       margin-top: 25px;
@@ -115,43 +208,88 @@
       background: #f3f4f6;
       border-radius: 12px;
     }
+
     .legend div {
       margin-bottom: 10px;
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .dot { width: 16px; height: 16px; border-radius: 50%; }
+
+    .dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+    }
   </style>
 </head>
+
 <body>
+
   <div class="header">
     <h1>⚡ Operativo Mantenimiento de Subestaciones Div Norte</h1>
+
     <div class="stats">
-      <div class="card"><h2>49</h2><p>Total</p></div>
-      <div class="card"><h2>38</h2><p>Terminadas</p></div>
-      <div class="card"><h2>11</h2><p>Pendientes</p></div>
+      <div class="card">
+        <h2>49</h2>
+        <p>Total</p>
+      </div>
+
+      <div class="card">
+        <h2>41</h2>
+        <p>Terminadas</p>
+      </div>
+
+      <div class="card">
+        <h2>8</h2>
+        <p>Pendientes</p>
+      </div>
     </div>
   </div>
 
   <div class="layout">
+
     <div class="sidebar">
+
       <h2>Subestaciones</h2>
-      <input type="text" class="search" id="search" placeholder="Buscar subestación..." />
+
+      <input
+        type="text"
+        class="search"
+        id="search"
+        placeholder="Buscar subestación..."
+      />
+
       <div id="lista"></div>
-   
+
       <div class="legend">
         <h3 style="margin-bottom: 12px;">Leyenda</h3>
-        <div><span class="dot" style="background:#16a34a"></span><span>Mantenimiento completado</span></div>
-        <div><span class="dot" style="background:#eab308"></span><span>En proceso</span></div>
-        <div><span class="dot" style="background:#dc2626"></span><span>Problemas encontrados</span></div>
+
+        <div>
+          <span class="dot" style="background:#16a34a"></span>
+          <span>Mantenimiento completado</span>
+        </div>
+
+        <div>
+          <span class="dot" style="background:#eab308"></span>
+          <span>En proceso</span>
+        </div>
+
+        <div>
+          <span class="dot" style="background:#dc2626"></span>
+          <span>Problemas encontrados</span>
+        </div>
       </div>
+
     </div>
+
     <div id="map"></div>
+
   </div>
 
   <script>
-    const subestaciones = [
+
+   const subestaciones = [
       {
         nombre: 'S.E ARCADIO',
         estado: 'Completado',
@@ -160,7 +298,7 @@
         lon: -103.14516100,
         fecha: '18/05/2026',
         responsable: 'Equipo Div Norte',
-        imagenes: ['Imagenes/ADI 4030.jpg', 'Imagenes/ADI 4040.jpg']
+        imagenes: ['imagenes/ADI 4030.jpg', 'imagenes/ADI 4040.jpg']
       },
       {
         nombre: 'S.E AEROPUERTO',
@@ -170,7 +308,7 @@
         lon: -106.44892500,
         fecha: '20/05/2026',
         responsable: 'Equipo Div Norte',
-        imagenes: ['Imagenes/AEP 4110.jpg', 'Imagenes/AEP 4120.jpg', 'Imagenes/AEP 4190.jpg']
+        imagenes: ['imagenes/AEP 4110.jpg', 'imagenes/AEP 4120.jpg', 'imagenes/AEP 4190.jpg']
       },
       {
         nombre: 'S.E ALLENDE',
@@ -181,9 +319,9 @@
         fecha: '22/05/2026',
         responsable: 'Equipo Div Norte',
         imagenes: [
-          'Imagenes/ALL 4010.jpg','Imagenes/ALL 4020.jpg','Imagenes/ALL 4030.jpg','Imagenes/ALL 4040.jpg',
-          'Imagenes/ALL 4050.jpg','Imagenes/ALL 4060.jpg','Imagenes/ALL 4080.jpg','Imagenes/ALL 4090.jpg',
-          'Imagenes/ALL 4100.jpg','Imagenes/ALL 4110.jpg','Imagenes/ALL 42010.jpg','Imagenes/ALL T1.jpg'
+          'imagenes/ALL 4010.jpg','imagenes/ALL 4020.jpg','imagenes/ALL 4030.jpg','imagenes/ALL 4040.jpg',
+          'imagenes/ALL 4050.jpg','imagenes/ALL 4060.jpg','imagenes/ALL 4080.jpg','imagenes/ALL 4090.jpg',
+          'imagenes/ALL 4100.jpg','imagenes/ALL 4110.jpg','imagenes/ALL 42010.jpg','imagenes/ALL T1.jpg'
         ]
       },
     {
@@ -195,9 +333,9 @@
     fecha: '17/05/2026',
     responsable: 'Equipo Div Norte',
     imagenes: [
-        'Imagenes/AMN 5010.jpg',
-        'Imagenes/AMN 5020.jpg',
-        'Imagenes/AMN 5030.jpg'
+        'imagenes/AMN 5010.jpg',
+        'imagenes/AMN 5020.jpg',
+        'imagenes/AMN 5030.jpg'
     ]
 },
 {
@@ -209,10 +347,10 @@
     fecha: '19/05/2026',
     responsable: 'Equipo Div Norte',
     imagenes: [
-        'Imagenes/AZT 42010.jpg',
-        'Imagenes/AZT 42020.jpg',
-        'Imagenes/AZT T1.jpg',
-        'Imagenes/AZT T2.jpg'
+        'imagenes/AZT 42010.jpg',
+        'imagenes/AZT 42020.jpg',
+        'imagenes/AZT T1.jpg',
+        'imagenes/AZT T2.jpg'
     ]
 },
 {
@@ -224,24 +362,24 @@
     fecha: '15/05/2026',
     responsable: 'Equipo Div Norte',
     imagenes: [
-        'Imagenes/BAT 4670.jpg',
-        'Imagenes/BAT 72010.jpg'
+        'imagenes/BAT 4670.jpg',
+        'imagenes/BAT 72010.jpg'
     ]
 },
 {
     nombre: 'S.E BENITO JUAREZ',
     estado: 'Completado',
-    clase: 'Verde',
+    clase: 'verde',
     lat: 30.13698600,
     lon: -106.87911700,
     fecha: '21/05/2026',
     responsable: 'Equipo Div Norte',
     imagenes: [
-        'Imagenes/BJZ 42010.jpg',
-        'Imagenes/BJZ 42020.jpg',
-        'Imagenes/BJZ 72010.jpg',
-        'Imagenes/BJZ T1.jpg',
-        'Imagenes/BJZ T2.jpg'
+        'imagenes/BJZ 42010.jpg',
+        'imagenes/BJZ 42020.jpg',
+        'imagenes/BJZ 72010.jpg',
+        'imagenes/BJZ T1.jpg',
+        'imagenes/BJZ T2.jpg'
     ]
 },
 {
@@ -253,8 +391,8 @@
     fecha: '16/05/2026',
     responsable: 'Equipo Div Norte',
     imagenes: [
-        'Imagenes/CAR 78010.jpg',
-        'Imagenes/CAR T2.jpg'
+        'imagenes/CAR 78010.jpg',
+        'imagenes/CAR T2.jpg'
     ]
 },
 {
@@ -266,17 +404,17 @@
     fecha: '18/05/2026',
     responsable: 'Equipo Div Norte',
     imagenes: [
-        'Imagenes/CGU 4010.jpg',
-        'Imagenes/CGU 4020.jpg',
-        'Imagenes/CGU 4060.jpg',
-        'Imagenes/CGU 4630.jpg',
-        'Imagenes/CGU 4640.jpg',
-        'Imagenes/CGU 4650.jpg',
-        'Imagenes/CGU 4670.jpg',
-        'Imagenes/CGU 42010.jpg',
-        'Imagenes/CGU 42020.jpg',
-        'Imagenes/CGU T1.jpg',
-        'Imagenes/CGU T2.jpg'
+        'imagenes/CGU 4010.jpg',
+        'imagenes/CGU 4020.jpg',
+        'imagenes/CGU 4060.jpg',
+        'imagenes/CGU 4630.jpg',
+        'imagenes/CGU 4640.jpg',
+        'imagenes/CGU 4650.jpg',
+        'imagenes/CGU 4670.jpg',
+        'imagenes/CGU 42010.jpg',
+        'imagenes/CGU 42020.jpg',
+        'imagenes/CGU T1.jpg',
+        'imagenes/CGU T2.jpg'
     ]
 },
 {
@@ -288,9 +426,9 @@
     fecha: '20/05/2026',
     responsable: 'Equipo Div Norte',
     imagenes: [
-        'Imagenes/CHA 42010.jpg',
-        'Imagenes/CHA 72020.jpg',
-        'Imagenes/CHA T1.jpg'
+        'imagenes/CHA 42010.jpg',
+        'imagenes/CHA 72020.jpg',
+        'imagenes/CHA T1.jpg'
     ]
 },
 {
@@ -302,8 +440,8 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/CLG T1.jpg',
-    'Imagenes/CLG T2.jpg'
+    'imagenes/CLG T1.jpg',
+    'imagenes/CLG T2.jpg'
   ]
 },
 {
@@ -315,10 +453,10 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/CUE 42010.jpg',
-    'Imagenes/CUE 78010.jpg',
-    'Imagenes/CUE 78020.jpg',
-    'Imagenes/CUE T1.jpg'
+    'imagenes/CUE 42010.jpg',
+    'imagenes/CUE 78010.jpg',
+    'imagenes/CUE 78020.jpg',
+    'imagenes/CUE T1.jpg'
   ]
 },
 {
@@ -330,8 +468,8 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/CVA 42025.jpg',
-    'Imagenes/CVA T2.jpg'
+    'imagenes/CVA 42025.jpg',
+    'imagenes/CVA T2.jpg'
   ]
 },
 {
@@ -343,10 +481,10 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/DGN 4015.jpg',
-    'Imagenes/DGN 4025.jpg',
-    'Imagenes/DGN 4055.jpg',
-    'Imagenes/DGN 4065.jpg'
+    'imagenes/DGN 4015.jpg',
+    'imagenes/DGN 4025.jpg',
+    'imagenes/DGN 4055.jpg',
+    'imagenes/DGN 4065.jpg'
   ]
 },
 {
@@ -358,19 +496,19 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/DGU 4210.jpg',
-    'Imagenes/DGU 4220.jpg',
-    'Imagenes/DGU 4230.jpg',
-    'Imagenes/DGU 4240.jpg',
-    'Imagenes/DGU 4250.jpg',
-    'Imagenes/DGU 4260.jpg',
-    'Imagenes/DGU 5010.jpg',
-    'Imagenes/DGU 5020.jpg',
-    'Imagenes/DGU 5030.jpg',
-    'Imagenes/DGU 5040.jpg',
-    'Imagenes/DGU 72010.jpg',
-    'Imagenes/DGU 42010.jpg',
-    'Imagenes/DGU T1.jpg'
+    'imagenes/DGU 4210.jpg',
+    'imagenes/DGU 4220.jpg',
+    'imagenes/DGU 4230.jpg',
+    'imagenes/DGU 4240.jpg',
+    'imagenes/DGU 4250.jpg',
+    'imagenes/DGU 4260.jpg',
+    'imagenes/DGU 5010.jpg',
+    'imagenes/DGU 5020.jpg',
+    'imagenes/DGU 5030.jpg',
+    'imagenes/DGU 5040.jpg',
+    'imagenes/DGU 72010.jpg',
+    'imagenes/DGU 42010.jpg',
+    'imagenes/DGU T1.jpg'
   ]
 },
 {
@@ -382,8 +520,8 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/FTS 42025.jpg',
-    'Imagenes/FTS T2.jpg'
+    'imagenes/FTS 42025.jpg',
+    'imagenes/FTS T2.jpg'
   ]
 },
 {
@@ -395,8 +533,8 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/GJO 42010.jpg',
-    'Imagenes/GJO T2.jpg'
+    'imagenes/GJO 42010.jpg',
+    'imagenes/GJO T2.jpg'
   ]
 },
 {
@@ -408,12 +546,12 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/IGS 4010.jpg',
-    'Imagenes/IGS 4020.jpg',
-    'Imagenes/IGS 4030.jpg',
-    'Imagenes/IGS 4040.jpg',
-    'Imagenes/IGS 4050.jpg',
-    'Imagenes/IGS 4060.jpg'
+    'imagenes/IGS 4010.jpg',
+    'imagenes/IGS 4020.jpg',
+    'imagenes/IGS 4030.jpg',
+    'imagenes/IGS 4040.jpg',
+    'imagenes/IGS 4050.jpg',
+    'imagenes/IGS 4060.jpg'
   ]
 },
 {
@@ -425,9 +563,9 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/INJ 42030.jpg',
-    'Imagenes/INJ 72030.jpg',
-    'Imagenes/INJ T3.jpg'
+    'imagenes/INJ 42030.jpg',
+    'imagenes/INJ 72030.jpg',
+    'imagenes/INJ T3.jpg'
   ]
 },
 {
@@ -439,22 +577,22 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/JEZ 4015.jpg',
-    'Imagenes/JEZ 4025.jpg',
-    'Imagenes/JEZ 4035.jpg',
-    'Imagenes/JEZ 4045.jpg',
-    'Imagenes/JEZ 4055.jpg',
-    'Imagenes/JEZ 5010.jpg',
-    'Imagenes/JEZ 5020.jpg',
-    'Imagenes/JEZ 5030.jpg',
-    'Imagenes/JEZ 5040.jpg',
-    'Imagenes/JEZ 5050.jpg',
-    'Imagenes/JEZ 52020.jpg',
-    'Imagenes/JEZ 52030.jpg',
-    'Imagenes/JEZ 72020.jpg',
-    'Imagenes/JEZ 72030.jpg',
-    'Imagenes/JEZ T2.jpg',
-    'Imagenes/JEZ T3.jpg'
+    'imagenes/JEZ 4015.jpg',
+    'imagenes/JEZ 4025.jpg',
+    'imagenes/JEZ 4035.jpg',
+    'imagenes/JEZ 4045.jpg',
+    'imagenes/JEZ 4055.jpg',
+    'imagenes/JEZ 5010.jpg',
+    'imagenes/JEZ 5020.jpg',
+    'imagenes/JEZ 5030.jpg',
+    'imagenes/JEZ 5040.jpg',
+    'imagenes/JEZ 5050.jpg',
+    'imagenes/JEZ 52020.jpg',
+    'imagenes/JEZ 52030.jpg',
+    'imagenes/JEZ 72020.jpg',
+    'imagenes/JEZ 72030.jpg',
+    'imagenes/JEZ T2.jpg',
+    'imagenes/JEZ T3.jpg'
   ]
 },
 {
@@ -466,14 +604,14 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/LAG 4025.jpg',
-    'Imagenes/LAG 4035.jpg',
-    'Imagenes/LAG 4045.jpg',
-    'Imagenes/LAG 4055.jpg',
-    'Imagenes/LAG 4065.jpg',
-    'Imagenes/LAG 4075.jpg',
-    'Imagenes/LAG 4085.jpg',
-    'Imagenes/LAG 4095.jpg'
+    'imagenes/LAG 4025.jpg',
+    'imagenes/LAG 4035.jpg',
+    'imagenes/LAG 4045.jpg',
+    'imagenes/LAG 4055.jpg',
+    'imagenes/LAG 4065.jpg',
+    'imagenes/LAG 4075.jpg',
+    'imagenes/LAG 4085.jpg',
+    'imagenes/LAG 4095.jpg'
   ]
 },
 {
@@ -485,8 +623,8 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/LIB 42010.jpg',
-    'Imagenes/LIB T2.jpg'
+    'imagenes/LIB 42010.jpg',
+    'imagenes/LIB T2.jpg'
   ]
 },
 {
@@ -498,11 +636,11 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/LRT 4170.jpg',
-    'Imagenes/LRT 4180.jpg',
-    'Imagenes/LRT 42010.jpg',
-    'Imagenes/LRT 72010.jpg',
-    'Imagenes/LRT T1.jpg'
+    'imagenes/LRT 4170.jpg',
+    'imagenes/LRT 4180.jpg',
+    'imagenes/LRT 42010.jpg',
+    'imagenes/LRT 72010.jpg',
+    'imagenes/LRT T1.jpg'
   ]
 },
 {
@@ -514,16 +652,16 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/LSA 5415.jpg',
-    'Imagenes/LSA 5425.jpg',
-    'Imagenes/LSA 5445.jpg',
-    'Imagenes/LSA 52015.jpg',
-    'Imagenes/LSA 52025.jpg',
-    'Imagenes/LSA 55015.jpg',
-    'Imagenes/LSA 55025.jpg',
-    'Imagenes/LSA 59125.jpg',
-    'Imagenes/LSA T1.jpg',
-    'Imagenes/LSA T2.jpg'
+    'imagenes/LSA 5415.jpg',
+    'imagenes/LSA 5425.jpg',
+    'imagenes/LSA 5445.jpg',
+    'imagenes/LSA 52015.jpg',
+    'imagenes/LSA 52025.jpg',
+    'imagenes/LSA 55015.jpg',
+    'imagenes/LSA 55025.jpg',
+    'imagenes/LSA 59125.jpg',
+    'imagenes/LSA T1.jpg',
+    'imagenes/LSA T2.jpg'
   ]
 },
 {
@@ -535,11 +673,11 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/MAY 4010.jpg',
-    'Imagenes/MAY 4020.jpg',
-    'Imagenes/MAY 4030.jpg',
-    'Imagenes/MAY 4040.jpg',
-    'Imagenes/MAY 42010.jpg'
+    'imagenes/MAY 4010.jpg',
+    'imagenes/MAY 4020.jpg',
+    'imagenes/MAY 4030.jpg',
+    'imagenes/MAY 4040.jpg',
+    'imagenes/MAY 42010.jpg'
   ]
 },
 {
@@ -551,17 +689,17 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/MED 4015.jpg',
-    'Imagenes/MED 4025.jpg',
-    'Imagenes/MED 4055.jpg',
-    'Imagenes/MED 4075.jpg',
-    'Imagenes/MED 4095.jpg',
-    'Imagenes/MED 4105.jpg',
-    'Imagenes/MED 4115.jpg',
-    'Imagenes/MED 42015.jpg',
-    'Imagenes/MED 45015.jpg',
-    'Imagenes/MED 45025.jpg',
-    'Imagenes/MED T1.jpg'
+    'imagenes/MED 4015.jpg',
+    'imagenes/MED 4025.jpg',
+    'imagenes/MED 4055.jpg',
+    'imagenes/MED 4075.jpg',
+    'imagenes/MED 4095.jpg',
+    'imagenes/MED 4105.jpg',
+    'imagenes/MED 4115.jpg',
+    'imagenes/MED 42015.jpg',
+    'imagenes/MED 45015.jpg',
+    'imagenes/MED 45025.jpg',
+    'imagenes/MED T1.jpg'
   ]
 },
 {
@@ -573,12 +711,12 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/MIL 4520.jpg',
-    'Imagenes/MIL 4530.jpg',
-    'Imagenes/MIL 4540.jpg',
-    'Imagenes/MIL 4550.jpg',
-    'Imagenes/MIL 42010.jpg',
-    'Imagenes/MIL T1.jpg'
+    'imagenes/MIL 4520.jpg',
+    'imagenes/MIL 4530.jpg',
+    'imagenes/MIL 4540.jpg',
+    'imagenes/MIL 4550.jpg',
+    'imagenes/MIL 42010.jpg',
+    'imagenes/MIL T1.jpg'
   ]
 },
 {
@@ -590,14 +728,14 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/NHO 5810.jpg',
-    'Imagenes/NHO 5840.jpg',
-    'Imagenes/NHO 52010.jpg',
-    'Imagenes/NHO 52020.jpg',
-    'Imagenes/NHO 72010.jpg',
-    'Imagenes/NHO 72020.jpg',
-    'Imagenes/NHO T1.jpg',
-    'Imagenes/NHO T2.jpg'
+    'imagenes/NHO 5810.jpg',
+    'imagenes/NHO 5840.jpg',
+    'imagenes/NHO 52010.jpg',
+    'imagenes/NHO 52020.jpg',
+    'imagenes/NHO 72010.jpg',
+    'imagenes/NHO 72020.jpg',
+    'imagenes/NHO T1.jpg',
+    'imagenes/NHO T2.jpg'
   ]
 },
 {
@@ -609,8 +747,8 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/PAL 42020.jpg',
-    'Imagenes/PAL T2.jpg'
+    'imagenes/PAL 42020.jpg',
+    'imagenes/PAL T2.jpg'
   ]
 },
 {
@@ -622,8 +760,8 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/RVA 42020.jpg',
-    'Imagenes/RVA T2.jpg'
+    'imagenes/RVA 42020.jpg',
+    'imagenes/RVA T2.jpg'
   ]
 },
 {
@@ -635,8 +773,8 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/SVC 42025.jpg',
-    'Imagenes/SVC T2.jpg'
+    'imagenes/SVC 42025.jpg',
+    'imagenes/SVC T2.jpg'
   ]
 },
 {
@@ -648,9 +786,9 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/TEC 42020.jpg',
-    'Imagenes/TEC 72010.jpg',
-    'Imagenes/TEC T2.jpg'
+    'imagenes/TEC 42020.jpg',
+    'imagenes/TEC 72010.jpg',
+    'imagenes/TEC T2.jpg'
   ]
 },
 {
@@ -662,14 +800,14 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/TOR 4015.jpg',
-    'Imagenes/TOR 4025.jpg',
-    'Imagenes/TOR 4035.jpg',
-    'Imagenes/TOR 4045.jpg',
-    'Imagenes/TOR 4075.jpg',
-    'Imagenes/TOR 4085.jpg',
-    'Imagenes/TOR 42015.jpg',
-    'Imagenes/TOR T2.jpg'
+    'imagenes/TOR 4015.jpg',
+    'imagenes/TOR 4025.jpg',
+    'imagenes/TOR 4035.jpg',
+    'imagenes/TOR 4045.jpg',
+    'imagenes/TOR 4075.jpg',
+    'imagenes/TOR 4085.jpg',
+    'imagenes/TOR 42015.jpg',
+    'imagenes/TOR T2.jpg'
   ]
 },
 {
@@ -681,13 +819,13 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/VAE 4015.jpg',
-    'Imagenes/VAE 4025.jpg',
-    'Imagenes/VAE 4035.jpg',
-    'Imagenes/VAE 4045.jpg',
-    'Imagenes/VAE 4055.jpg',
-    'Imagenes/VAE 4065.jpg',
-    'Imagenes/VAE 47015.jpg'
+    'imagenes/VAE 4015.jpg',
+    'imagenes/VAE 4025.jpg',
+    'imagenes/VAE 4035.jpg',
+    'imagenes/VAE 4045.jpg',
+    'imagenes/VAE 4055.jpg',
+    'imagenes/VAE 4065.jpg',
+    'imagenes/VAE 47015.jpg'
   ]
 },
 {
@@ -699,13 +837,152 @@
   fecha: '22/05/2026',
   responsable: 'Equipo Div Norte',
   imagenes: [
-    'Imagenes/VDS 4015.jpg',
-    'Imagenes/VDS 4025.jpg',
-    'Imagenes/VDS 4035.jpg',
-    'Imagenes/VDS 4045.jpg',
-    'Imagenes/VDS 4055.jpg',
-    'Imagenes/VDS 4065.jpg',
-    'Imagenes/VDS T1.jpg'
+    'imagenes/VDS 4015.jpg',
+    'imagenes/VDS 4025.jpg',
+    'imagenes/VDS 4035.jpg',
+    'imagenes/VDS 4045.jpg',
+    'imagenes/VDS 4055.jpg',
+    'imagenes/VDS 4065.jpg',
+    'imagenes/VDS T1.jpg'
+  ]
+},
+{
+  nombre: 'S.E ALVARO OBREGON',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 28.71635100,
+  lon: -106.91311000,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'Imagenes/AVO 5320.jpg',
+    'Imagenes/AVO 5340.jpg',
+    'Imagenes/AVO 5360.jpg',
+    'Imagenes/AVO 72010.jpg',
+    'Imagenes/AVO 72020.jpg'
+  ]
+},
+{
+  nombre: 'S.E BASASEACHI',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 28.20918300,
+  lon: -108.18791800,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'Imagenes/BAS.jpg'
+  ]
+},
+{
+  nombre: 'S.E CHIHUAHUA PONIENTE',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 28.59563400,
+  lon: -106.10452300,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'Imagenes/CHP 5210.jpg',
+    'Imagenes/CHP 5220.jpg',
+    'Imagenes/CHP 5230.jpg',
+    'Imagenes/CHP 5240.jpg',
+    'Imagenes/CHP 5250.jpg',
+    'Imagenes/CHP 5260.jpg',
+    'Imagenes/CHP 52010.jpg',
+    'Imagenes/CHP 52020.jpg',
+    'Imagenes/CHP 72010.jpg',
+    'Imagenes/CHP 72020.jpg',
+    'Imagenes/CHP 73120.jpg',
+    'Imagenes/CHP 73560.jpg',
+    'Imagenes/CHP 73570.jpg',
+    'Imagenes/CHP 73580.jpg',
+    'Imagenes/CHP ESQ.jpg',
+    'Imagenes/CHP T1.jpg',
+    'Imagenes/CHP T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E EL SAUZ',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 28.95298400,
+  lon: -106.27744000,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'Imagenes/ESZ 5510.jpg',
+    'Imagenes/ESZ 5520.jpg',
+    'Imagenes/ESZ 5530.jpg',
+    'Imagenes/ESZ 5540.jpg',
+    'Imagenes/ESZ 5550.jpg',
+    'Imagenes/ESZ 52010.jpg',
+    'Imagenes/ESZ 52020.jpg',
+    'Imagenes/ESZ 72010.jpg',
+    'Imagenes/ESZ 72020.jpg',
+    'Imagenes/ESZ 75010.jpg',
+    'Imagenes/ESZ BUS.jpg',
+    'Imagenes/ESZ T1.jpg',
+    'Imagenes/ESZ T2.jpg'
+  ]
+},
+{
+  nombre: 'S.E LOPEZ MATEOS',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 28.47606000,
+  lon: -107.31349500,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'Imagenes/LZM 5210.jpg',
+    'Imagenes/LZM 5220.jpg',
+    'Imagenes/LZM 5230.jpg',
+    'Imagenes/LZM 5240.jpg',
+    'Imagenes/LZM 5250.jpg',
+    'Imagenes/LZM 72010.jpg',
+    'Imagenes/LZM 72020.jpg'
+  ]
+},
+{
+  nombre: 'S.E MANITOBA',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 28.53475244,
+  lon: -106.94629420,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'Imagenes/MBA 5810.jpg'
+  ]
+},
+{
+  nombre: 'S.E PARRAL',
+  estado: 'Completado',
+  clase: 'verde',
+  lat: 26.94012767,
+  lon: -105.67620280,
+  fecha: '22/05/2026',
+  responsable: 'Equipo Div Norte',
+  imagenes: [
+    'Imagenes/PAR 4010.jpg',
+    'Imagenes/PAR 4020.jpg',
+    'Imagenes/PAR 4030.jpg',
+    'Imagenes/PAR 4060.jpg',
+    'Imagenes/PAR 4340.jpg',
+    'Imagenes/PAR 4350.jpg',
+    'Imagenes/PAR 4370.jpg',
+    'Imagenes/PAR 42010.jpg',
+    'Imagenes/PAR 42020.jpg',
+    'Imagenes/PAR 42030.jpg',
+    'Imagenes/PAR 49000.jpg',
+    'Imagenes/PAR 72010.jpg',
+    'Imagenes/PAR 72020.jpg',
+    'Imagenes/PAR 72030.jpg',
+    'Imagenes/PAR T01.jpg',
+    'Imagenes/PAR T02.jpg',
+    'Imagenes/PAR T03.jpg',
+    'Imagenes/PAR UTR.jpg'
   ]
 },
       {
@@ -717,78 +994,175 @@
         fecha: '22/05/2026',
         responsable: 'Equipo Div Norte',
         imagenes: [
-          'Imagenes/ZZA 4610.jpg','Imagenes/ZZA 4620.jpg','Imagenes/ZZA 4630.jpg','Imagenes/ZZA 4640.jpg',
-          'Imagenes/ZZA 4650.jpg','Imagenes/ZZA 4660.jpg','Imagenes/ZZA 42020.jpg','Imagenes/ZZA T2.jpg'
+          'imagenes/ZZA 4610.jpg','imagenes/ZZA 4620.jpg','imagenes/ZZA 4630.jpg','imagenes/ZZA 4640.jpg',
+          'imagenes/ZZA 4650.jpg','imagenes/ZZA 4660.jpg','imagenes/ZZA 42020.jpg','imagenes/ZZA T2.jpg'
         ]
       }
     ];   // ←←← Aquí se cerró correctamente el array
 
+    
+
     const map = L.map('map').setView([25.60, -103.48], 8);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+
+    L.tileLayer(
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {
+        attribution: '&copy; OpenStreetMap contributors'
+      }
+    ).addTo(map);
 
     const lista = document.getElementById('lista');
+
     const indicesImagenes = {};
 
     subestaciones.forEach(sub => {
-      const color = sub.clase === 'verde' ? 'green' : sub.clase === 'amarillo' ? 'orange' : 'red';
 
-      const marker = L.circleMarker([sub.lat, sub.lon], {
-        radius: 9,
-        color: color,
-        fillColor: color,
-        fillOpacity: 0.85
-      }).addTo(map);
+      const color =
+        sub.clase === 'verde'
+          ? 'green'
+          : sub.clase === 'amarillo'
+          ? 'orange'
+          : 'red';
+
+      const marker = L.circleMarker(
+        [sub.lat, sub.lon],
+        {
+          radius: 9,
+          color: color,
+          fillColor: color,
+          fillOpacity: 0.85
+        }
+      ).addTo(map);
 
       marker.bindPopup(`
-        <div style="width:280px;">
-          <h3>${sub.nombre}</h3>
-          <p><b>Estado:</b> ${sub.estado}</p>
-          <p><b>Fecha:</b> ${sub.fecha}</p>
-          <p><b>Responsable:</b> ${sub.responsable}</p>
-          <div class="slider-container">
-            <button class="slider-btn prev-btn" onclick="cambiarImagen('${sub.nombre}', -1)">‹</button>
-            <img id="img-${sub.nombre}" class="slider-img" src="${sub.imagenes[0]}" />
-            <button class="slider-btn next-btn" onclick="cambiarImagen('${sub.nombre}', 1)">›</button>
+        <div style="width:500px;">
+
+          <div class="popup-title">
+            ${sub.nombre}
           </div>
+
+          <div class="popup-info">
+            <b>Estado:</b> ${sub.estado}
+          </div>
+
+          <div class="popup-info">
+            <b>Fecha:</b> ${sub.fecha}
+          </div>
+
+          <div class="popup-info">
+            <b>Responsable:</b> ${sub.responsable}
+          </div>
+
+          <div class="slider-container">
+
+            <button
+              class="slider-btn prev-btn"
+              onclick="cambiarImagen('${sub.nombre}', -1)">
+              ‹
+            </button>
+
+            <img
+              id="img-${sub.nombre}"
+              class="slider-img"
+              src="${sub.imagenes[0]}"
+            />
+
+            <button
+              class="slider-btn next-btn"
+              onclick="cambiarImagen('${sub.nombre}', 1)">
+              ›
+            </button>
+
+          </div>
+
+          <div class="popup-img-counter">
+            ${sub.imagenes.length} imágenes disponibles
+          </div>
+
         </div>
       `);
 
       const div = document.createElement('div');
+
       div.className = 'subestacion';
+
       div.innerHTML = `
         <h3>${sub.nombre}</h3>
-        <p>Responsable: ${sub.responsable}</p>
-        <p>Fecha: ${sub.fecha}</p>
-        <span class="estado ${sub.clase}">${sub.estado}</span>
+
+        <p>
+          Responsable: ${sub.responsable}
+        </p>
+
+        <p>
+          Fecha: ${sub.fecha}
+        </p>
+
+        <span class="estado ${sub.clase}">
+          ${sub.estado}
+        </span>
       `;
+
       div.onclick = () => {
         map.setView([sub.lat, sub.lon], 13);
         marker.openPopup();
       };
+
       lista.appendChild(div);
+
     });
 
     window.cambiarImagen = function(nombre, direccion) {
-      const sub = subestaciones.find(s => s.nombre === nombre);
+
+      const sub =
+        subestaciones.find(s => s.nombre === nombre);
+
       if (!sub) return;
-      if (indicesImagenes[nombre] === undefined) indicesImagenes[nombre] = 0;
-      
+
+      if (indicesImagenes[nombre] === undefined) {
+        indicesImagenes[nombre] = 0;
+      }
+
       indicesImagenes[nombre] += direccion;
-      if (indicesImagenes[nombre] >= sub.imagenes.length) indicesImagenes[nombre] = 0;
-      if (indicesImagenes[nombre] < 0) indicesImagenes[nombre] = sub.imagenes.length - 1;
-      
-      document.getElementById(`img-${nombre}`).src = sub.imagenes[indicesImagenes[nombre]];
+
+      if (indicesImagenes[nombre] >= sub.imagenes.length) {
+        indicesImagenes[nombre] = 0;
+      }
+
+      if (indicesImagenes[nombre] < 0) {
+        indicesImagenes[nombre] = sub.imagenes.length - 1;
+      }
+
+      document.getElementById(
+        `img-${nombre}`
+      ).src =
+        sub.imagenes[indicesImagenes[nombre]];
     };
 
-    // Buscador
-    document.getElementById('search').addEventListener('keyup', function() {
-      const texto = this.value.toLowerCase();
-      document.querySelectorAll('.subestacion').forEach(card => {
-        card.style.display = card.innerText.toLowerCase().includes(texto) ? 'block' : 'none';
+    // BUSCADOR
+
+    document
+      .getElementById('search')
+      .addEventListener('keyup', function () {
+
+        const texto =
+          this.value.toLowerCase();
+
+        document
+          .querySelectorAll('.subestacion')
+          .forEach(card => {
+
+            card.style.display =
+              card.innerText
+                .toLowerCase()
+                .includes(texto)
+                ? 'block'
+                : 'none';
+
+          });
+
       });
-    });
+
   </script>
+
 </body>
 </html>
