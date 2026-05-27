@@ -221,6 +221,137 @@
       height: 16px;
       border-radius: 50%;
     }
+    /* =========================
+   RESPONSIVE CELULAR/TABLET
+========================= */
+
+@media (max-width: 900px) {
+
+  .layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  #map {
+    height: 70vh;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .header h1 {
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  .stats {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .card {
+    flex: 1;
+    min-width: 90px;
+    padding: 10px;
+  }
+
+  .card h2 {
+    font-size: 22px;
+  }
+
+  .card p {
+    font-size: 12px;
+  }
+
+  .leaflet-popup-content {
+    width: 90vw !important;
+    margin: 10px;
+  }
+
+  .popup-title {
+    font-size: 18px;
+  }
+
+  .popup-info {
+    font-size: 13px;
+  }
+
+  .slider-img {
+    height: 220px;
+  }
+
+  .slider-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  .search {
+    font-size: 16px;
+  }
+
+  .subestacion h3 {
+    font-size: 16px;
+  }
+
+  .subestacion p {
+    font-size: 13px;
+  }
+
+}
+
+/* EXTRA CHIQUITO - CELULARES */
+@media (max-width: 600px) {
+
+  .header {
+    padding: 15px;
+  }
+
+  .header h1 {
+    font-size: 16px;
+  }
+
+  .stats {
+    gap: 8px;
+  }
+
+  .card {
+    min-width: 80px;
+    border-radius: 10px;
+  }
+
+  .card h2 {
+    font-size: 18px;
+  }
+
+  .card p {
+    font-size: 11px;
+  }
+
+  .sidebar {
+    padding: 15px;
+  }
+
+  .slider-img {
+    height: 180px;
+  }
+
+  #map {
+    height: 65vh;
+  }
+
+}
   </style>
 </head>
 
