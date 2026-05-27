@@ -136,7 +136,7 @@
 
     .slider-img {
       width: 100%;
-      height: 320px;
+      max-height: 320px;
       object-fit: contain;
       border-radius: 14px;
       background: #000;
@@ -221,114 +221,42 @@
       height: 16px;
       border-radius: 50%;
     }
-    /* =========================
-   RESPONSIVE CELULAR/TABLET
-========================= */
 
-@media (max-width: 900px) {
+/* =========================================
+   RESPONSIVE REAL PARA CELULAR
+========================================= */
 
-  .layout {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
+@media screen and (max-width: 768px) {
 
-  .sidebar {
-    width: 100%;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid #e5e7eb;
-  }
-
-  #map {
-    height: 70vh;
+  body {
+    overflow-x: hidden;
   }
 
   .header {
+    padding: 12px;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-
-  .header h1 {
-    font-size: 18px;
-    line-height: 1.3;
-  }
-
-  .stats {
-    width: 100%;
-    justify-content: space-between;
-    flex-wrap: wrap;
-  }
-
-  .card {
-    flex: 1;
-    min-width: 90px;
-    padding: 10px;
-  }
-
-  .card h2 {
-    font-size: 22px;
-  }
-
-  .card p {
-    font-size: 12px;
-  }
-
-  .leaflet-popup-content {
-    width: 90vw !important;
-    margin: 10px;
-  }
-
-  .popup-title {
-    font-size: 18px;
-  }
-
-  .popup-info {
-    font-size: 13px;
-  }
-
-  .slider-img {
-    height: 220px;
-  }
-
-  .slider-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 20px;
-  }
-
-  .search {
-    font-size: 16px;
-  }
-
-  .subestacion h3 {
-    font-size: 16px;
-  }
-
-  .subestacion p {
-    font-size: 13px;
-  }
-
-}
-
-/* EXTRA CHIQUITO - CELULARES */
-@media (max-width: 600px) {
-
-  .header {
-    padding: 15px;
+    align-items: stretch;
+    gap: 12px;
   }
 
   .header h1 {
     font-size: 16px;
+    text-align: center;
+    line-height: 1.4;
   }
 
   .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
+    width: 100%;
   }
 
   .card {
-    min-width: 80px;
-    border-radius: 10px;
+    min-width: unset;
+    width: 100%;
+    padding: 10px 5px;
+    border-radius: 12px;
   }
 
   .card h2 {
@@ -339,19 +267,137 @@
     font-size: 11px;
   }
 
-  .sidebar {
-    padding: 15px;
+  .layout {
+    flex-direction: column;
+    height: auto;
   }
 
-  .slider-img {
-    height: 180px;
+  .sidebar {
+    width: 100%;
+    height: auto;
+    max-height: 45vh;
+    overflow-y: auto;
+    padding: 12px;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
   }
 
   #map {
-    height: 65vh;
+    width: 100%;
+    height: 55vh;
+  }
+
+  .search {
+    padding: 10px;
+    font-size: 15px;
+    margin-bottom: 15px;
+  }
+
+  .subestacion {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+  }
+
+  .subestacion h3 {
+    font-size: 15px;
+    margin-bottom: 5px;
+  }
+
+  .subestacion p {
+    font-size: 12px;
+  }
+
+  .estado {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .legend {
+    margin-top: 15px;
+    padding: 12px;
+  }
+
+  .legend h3 {
+    font-size: 15px;
+  }
+
+  .legend span {
+    font-size: 12px;
+  }
+
+  /* ===== POPUPS ===== */
+
+  .leaflet-popup-content-wrapper {
+    border-radius: 16px;
+    padding: 6px;
+  }
+
+  .leaflet-popup-content {
+    width: 78vw !important;
+    margin: 8px !important;
+  }
+
+  .popup-title {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .popup-info {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .slider-container {
+    margin-top: 10px;
+  }
+
+  .slider-img {
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+    border-radius: 12px;
+  }
+
+  .slider-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .popup-img-counter {
+    font-size: 11px;
+    margin-top: 6px;
   }
 
 }
+
+/* CELULARES MUY CHIQUITOS */
+
+@media screen and (max-width: 480px) {
+
+  .header h1 {
+    font-size: 14px;
+  }
+
+  .card h2 {
+    font-size: 16px;
+  }
+
+  .card p {
+    font-size: 10px;
+  }
+
+  .slider-img {
+    height: 150px;
+  }
+
+  #map {
+    height: 50vh;
+  }
+
+}
+
   </style>
 </head>
 
@@ -1166,7 +1212,7 @@
       ).addTo(map);
 
       marker.bindPopup(`
-        <div style="width:500px;">
+        <div style="width:100%; max-width:500px;">
 
           <div class="popup-title">
             ${sub.nombre}
